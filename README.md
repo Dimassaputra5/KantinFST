@@ -6,6 +6,29 @@ Dokumen ini merangkum hasil pengolahan data tentang **berapa lama seseorang bera
 
 Perhitungan dan grafik lengkapnya ada di `src/simulasi/kantin.ipynb`.
 
+## Instalasi
+
+Cara yang disarankan, memakai `pyproject.toml` dan `uv.lock`:
+
+```bash
+uv sync
+```
+
+Alternatifnya, memakai `requirements.txt` yang sudah berisi semua paket beserta versinya:
+
+```bash
+uv venv
+uv pip install -r requirements.txt
+```
+
+Setelah itu, buka notebook di VS Code atau Jupyter, lalu pilih kernel/interpreter dari `.venv`.
+
+Jika dependensi di `pyproject.toml` berubah, `requirements.txt` dapat diperbarui dengan:
+
+```bash
+uv export --format requirements-txt --no-hashes --no-emit-project -o requirements.txt
+```
+
 ## Data yang Dipakai
 
 Data berisi 52 catatan durasi kunjungan dari beberapa hari (Senin, Selasa, Kamis, Jumat) dan beberapa jam (pukul 10, 12, dan 15). Sebagian besar catatan berasal dari hari Selasa (25 catatan) dan Kamis (16 catatan).
