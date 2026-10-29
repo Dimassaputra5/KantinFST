@@ -7,8 +7,8 @@ Kantin FST menjadi tempat mahasiswa, staf, dosen, dan pengunjung fakultas membel
 - Setengah kunjungan berakhir dalam 1 menit 47 detik atau kurang. Sebanyak 56% berakhir dalam 2 menit dan 69% dalam 3 menit.
 - Rata-rata kunjungan mencapai 2 menit 33 detik. Angka ini lebih tinggi karena enam kunjungan berlangsung antara 8 menit 2 detik dan 8 menit 50 detik.
 - Kunjungan singkat jauh lebih banyak daripada kunjungan panjang. Jumlah kunjungan menurun ketika durasi bertambah, dengan celah kosong pada rentang 6 sampai 8 menit.
-- Distribusi eksponensial cocok dengan data (uji Kolmogorov-Smirnov: D = 0,117; p = 0,222), sedangkan distribusi normal dan uniform ditolak.
-- Simulasi 1.000 kunjungan menghasilkan rata-rata 2 menit 29 detik dan pola yang mirip dengan data asli.
+- Dalam perbandingan utama, log-normal lebih sesuai daripada eksponensial standar (`loc=0`): AIC 915,55 vs 930,92 dan KS D 0,0647 vs 0,1748. Eksponensial bergeser (`loc=14`) masih menjadi alternatif yang masuk akal (AIC 918,17).
+- Simulasi 1.000 kunjungan dari model log-normal menghasilkan rata-rata sekitar 2 menit 29 detik dan median sekitar 1 menit 52 detik; proporsi kunjungan singkat tetap mendekati data asli.
 
 ## Latar Belakang
 
@@ -45,46 +45,45 @@ Rata-rata lebih tinggi daripada nilai tengah. Sebagian besar pengunjung keluar d
 
 ## Pola Kunjungan
 
-Kajian ini menguji tiga kemungkinan bentuk sebaran. Bentuk pertama adalah eksponensial, yaitu kunjungan singkat yang jumlahnya menurun cepat ketika durasi bertambah. Bentuk kedua adalah normal, yaitu durasi yang simetris di sekitar rata-rata sehingga kunjungan sangat singkat dan sangat lama sama-sama jarang. Bentuk ketiga adalah uniform, yaitu durasi yang tersebar merata dari singkat sampai lama.
+Kajian membandingkan tiga model untuk durasi positif: **eksponensial standar** dengan `loc=0`, **log-normal** dengan `loc=0`, dan **eksponensial bergeser** dengan parameter `loc` diestimasi dari data. Model bergeser dimasukkan sebagai analisis sensitivitas karena analisis sebelumnya menggunakan `loc` sebesar nilai minimum yang diamati (14 detik).
 
-Kecocokan setiap bentuk diuji dengan Kolmogorov-Smirnov. Uji ini membandingkan sebaran kumulatif data dengan sebaran kumulatif model; semakin kecil statistik D, semakin dekat model dengan data. Hasilnya ada di Tabel 2.
+Kecocokan diperiksa melalui log-likelihood, AIC/BIC, dan statistik Kolmogorov–Smirnov (KS). AIC/BIC yang lebih kecil menunjukkan model yang lebih disukai dengan mempertimbangkan jumlah parameter; statistik KS `D` yang lebih kecil berarti kurva kumulatif model lebih dekat ke distribusi empiris. Nilai p KS pada tabel dihitung menggunakan **parametric bootstrap 2.000 replikasi**, dengan parameter diestimasi ulang pada setiap replikasi. Ini menghindari penggunaan p-value KS standar secara langsung setelah parameter model diestimasi.
 
-**Tabel 2. Hasil uji kecocokan distribusi**
+**Tabel 2. Perbandingan kecocokan model distribusi**
 
-| Distribusi | Parameter hasil fit | D | p-value | Keputusan (α = 0,05) |
-| --- | --- | --- | --- | --- |
-| Eksponensial | loc = 14; scale = 139,23 | 0,117 | 0,222 | Tidak ditolak |
-| Normal | rata-rata = 153,23; simpangan baku = 129,73 | 0,184 | 0,010 | Ditolak |
-| Uniform | loc = 14; scale = 516 | 0,419 | < 0,001 | Ditolak |
+| Model | Parameter hasil fit | Log-likelihood | AIC | BIC | KS D | p-value bootstrap KS |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Eksponensial (`loc=0`) | `scale = 153,23` | -464,461 | 930,923 | 933,266 | 0,1748 | 0,0015 |
+| Log-normal (`loc=0`) | `shape = 0,8101`; `scale = 111,14` | -455,774 | **915,548** | **920,236** | **0,0647** | 0,5937 |
+| Eksponensial bergeser | `loc = 14`; `scale = 139,23` | -457,084 | 918,168 | 922,855 | 0,1172 | 0,0685 |
 
-Data paling dekat dengan bentuk eksponensial. Sebanyak 53 dari 77 kunjungan selesai dalam 3 menit atau kurang, dan hanya 12 kunjungan melewati 5 menit. Jumlah kunjungan menurun ketika durasi bertambah, meskipun ada kenaikan kecil pada rentang 3 sampai 5 menit. Bentuk normal dan uniform tidak menggambarkan data dengan baik karena data tidak simetris dan tidak tersebar merata.
+**Interpretasi.** Log-normal adalah pilihan utama: ia memiliki AIC terendah dan statistik KS paling kecil. Dibanding eksponensial standar (`loc=0`), selisih AIC sekitar 15,37 menunjukkan keunggulan log-normal yang cukup jelas pada data ini. Namun, eksponensial bergeser memperbaiki kecocokan secara berarti dan hanya memiliki AIC 2,62 poin lebih tinggi daripada log-normal. Karena itu, kesimpulannya bukan bahwa eksponensial sama sekali mustahil, melainkan bahwa log-normal lebih disukai dalam perbandingan model yang diuji.
 
-Pola menurun cepat dapat diringkas menjadi dua bagian:
+Pola data tetap didominasi durasi singkat: 53 dari 77 kunjungan selesai dalam 3 menit atau kurang, sementara 12 kunjungan melewati 5 menit. Enam kunjungan berada di kisaran 8 menit dan termasuk pencilan menurut batas IQR 6 menit 36 detik. Kelompok tersebut berkontribusi pada ekor kanan yang panjang dan perlu dipertahankan dalam analisis karena memang diamati di lapangan.
 
-- Kunjungan tercepat 14 detik, yang dipakai sebagai titik awal.
-- Tambahan waktu rata-rata sekitar 139 detik di atas titik awal itu.
-
-Gabungan keduanya menghasilkan rata-rata 153,23 detik atau 2 menit 33 detik. Sebagian besar tambahan waktu berukuran pendek. Hanya sebagian kecil yang panjang, dan itulah yang menjelaskan keberadaan enam kunjungan sekitar 8 menit. Pola ini juga menjelaskan mengapa kunjungan panjang tidak perlu dibuang. Kunjungan seperti itu jarang, tetapi tetap merupakan bagian dari kebiasaan pengunjung. Perlu dicatat, p-value 0,222 hanya berarti data belum cukup untuk menolak bentuk eksponensial, bukan bukti bahwa pola itu pasti benar.
+**Catatan interpretasi uji.** p-value bootstrap yang tidak kecil bukan bukti bahwa model pasti benar. Dengan 77 catatan, hasil ini merupakan dukungan relatif terhadap bentuk distribusi, bukan kepastian mengenai mekanisme yang menghasilkan durasi.
 
 ## Hasil Simulasi
 
-Simulasi menguji apakah pola yang ditemukan dapat menghasilkan data baru yang mirip dengan data asli. Simulasi memakai 1.000 kunjungan acak dengan aturan 14 detik ditambah tambahan waktu acak yang rata-rata 139,23 detik. Hasilnya dibandingkan dengan 77 kunjungan asli.
+Simulasi memakai 1.000 durasi baru dari model log-normal (`shape ≈ 0,8101`, `loc = 0`, `scale ≈ 111,14` detik) dan membandingkannya dengan 77 kunjungan asli. Seed acak ditetapkan agar hasil dapat direproduksi.
 
-**Tabel 3. Perbandingan data asli dan hasil simulasi**
+**Tabel 3. Perbandingan data asli dan hasil simulasi log-normal**
 
-| Ukuran | Data asli (77 kunjungan) | Simulasi (1.000 kunjungan) |
-| --- | --- | --- |
-| Rata-rata | 2 menit 33 detik | 2 menit 29 detik |
-| Nilai tengah | 1 menit 47 detik | 1 menit 50 detik |
-| Kunjungan tercepat | 14 detik | 14,6 detik |
-| Kunjungan terlama | 8 menit 50 detik | 19 menit 12 detik |
-| Selesai dalam 2 menit | 55,8% | 54,2% |
-| Selesai dalam 3 menit | 68,8% | 70,8% |
-| Selesai dalam 5 menit | 84,4% | 86,7% |
+| Ukuran | Data asli (77 kunjungan) | Simulasi log-normal (1.000 kunjungan) |
+| --- | ---: | ---: |
+| Rata-rata | 153,23 detik (2 menit 33 detik) | 149,26 detik (2 menit 29 detik) |
+| Nilai tengah | 107 detik (1 menit 47 detik) | 111,70 detik (1 menit 52 detik) |
+| Kunjungan tercepat | 14 detik | 5,78 detik |
+| Kunjungan terlama | 530 detik (8 menit 50 detik) | 1.459,69 detik (24 menit 20 detik) |
+| Selesai dalam 2 menit | 55,8% | 54,0% |
+| Selesai dalam 3 menit | 68,8% | 75,1% |
+| Selesai dalam 5 menit | 84,4% | 89,6% |
 
-Hasil simulasi mendekati data asli pada rata-rata, nilai tengah, dan persentase kunjungan pendek. Selisih beberapa poin persen muncul karena data asli hanya berisi 77 catatan, sedangkan simulasi memakai 1.000 kunjungan. Jumlah data yang berbeda membuat kejadian langka lebih mudah muncul di simulasi. Salah satunya adalah kunjungan 19 menit 12 detik, yang tidak muncul di data asli tetapi mungkin terjadi dalam pola eksponensial. Karena memakai angka acak, hasil simulasi dapat berbeda sedikit jika dijalankan ulang; notebook memakai `np.random.seed(42)` agar hasilnya dapat diulang.
+Rata-rata dan median hasil simulasi dekat dengan data asli. Proporsi yang selesai dalam 2–5 menit juga berada pada kisaran yang sama, meskipun selisihnya terlihat pada batas 3 dan 5 menit. Simulasi lebih besar daripada sampel asli sehingga nilai ekstrem lebih mungkin muncul; durasi maksimum 24 menit 20 detik adalah keluaran model, bukan pengamatan nyata.
 
-Simulasi membantu melihat kemungkinan yang masuk akal berdasarkan data. Di notebook, grafik durasi simulasi mengikuti pola menurun cepat. Garis data asli dan garis simulasi hampir berhimpit. Bagian kunjungan yang selesai dalam 2, 3, serta 5 menit juga berada di kisaran yang berdekatan.
+Model log-normal dengan `loc=0` memiliki dukungan positif mulai dekat nol, sehingga simulasi dapat menghasilkan durasi di bawah minimum sampel 14 detik. Nilai minimum yang teramati adalah minimum **dalam sampel**, bukan bukti bahwa durasi di bawah 14 detik mustahil. Jika proses operasional memang memiliki batas minimum yang pasti, model bergeser perlu diuji kembali.
+
+Simulasi ini hanya membangkitkan lama kunjungan. Ia tidak memodelkan waktu kedatangan, antrean, atau jumlah pengunjung yang berada di kantin pada saat bersamaan.
 
 ## Apa Artinya bagi Kantin
 
@@ -100,15 +99,15 @@ Simulasi yang ada sekarang baru menghasilkan lama kunjungan. Untuk mengukur bera
 - Data berasal dari Kantin FST pada beberapa hari dan jam. Pengunjungnya didominasi mahasiswa, sehingga pola ini belum tentu menggambarkan kebiasaan staf dan dosen. Pola kunjungan juga bisa berbeda pada jam sibuk, hari libur, atau kantin lain.
 - Enam kunjungan sekitar 8 menit tergolong pencilan menurut IQR dan cukup memengaruhi rata-rata. Karena itu, nilai tengah perlu dibaca bersama rata-rata.
 - Data tidak mencatat waktu kedatangan. Kajian ini belum bisa menjelaskan jam ramai, jumlah pengunjung pada waktu yang sama, atau antrean.
-- Pola eksponensial adalah model terdekat dari data yang ada, bukan kepastian. Data yang lebih banyak dapat mengubah gambaran dan hasil uji.
+- Log-normal lebih disukai berdasarkan AIC dan statistik KS, tetapi eksponensial bergeser tetap menjadi alternatif. Hasil sensitif terhadap asumsi parameter lokasi dan masih perlu dievaluasi dengan lebih banyak data.
 
 ## Kesimpulan
 
-Kunjungan ke Kantin FST didominasi kunjungan singkat. Nilai tengah 1 menit 47 detik, 55,8% kunjungan selesai dalam 2 menit, dan 84,4% selesai dalam 5 menit. Rata-rata 2 menit 33 detik lebih tinggi karena enam kunjungan berlangsung sekitar 8 menit.
+Kunjungan ke Kantin FST didominasi durasi singkat. Nilai tengahnya 1 menit 47 detik, 55,8% kunjungan selesai dalam 2 menit, dan 84,4% selesai dalam 5 menit. Rata-rata 2 menit 33 detik lebih tinggi karena enam kunjungan berlangsung sekitar 8 menit.
 
-Pola yang paling menggambarkan data adalah penurunan cepat yang sesuai dengan distribusi eksponensial (loc 14 detik, scale 139,23 detik). Uji Kolmogorov-Smirnov tidak menolak model ini (D = 0,117; p = 0,222), sedangkan model normal dan uniform ditolak. Simulasi 1.000 kunjungan berhasil meniru pola itu dengan rata-rata 2 menit 29 detik dan persentase kunjungan pendek yang berdekatan dengan data asli.
+Dari tiga model yang dibandingkan, **log-normal (`loc=0`) paling disukai** berdasarkan AIC (915,55) dan statistik KS (D = 0,0647), dibandingkan eksponensial standar (AIC 930,92; D = 0,1748). Eksponensial bergeser dengan `loc=14` dan `scale=139,23` masih masuk akal sebagai alternatif (AIC 918,17), sehingga keunggulan log-normal terhadap model bergeser tidak mutlak. Simulasi 1.000 kunjungan dari model log-normal menghasilkan rata-rata 2 menit 29 detik dan median 1 menit 52 detik.
 
-Meski begitu, untuk perencanaan kapasitas dan jam sibuk, kajian ini perlu dilengkapi data waktu kedatangan.
+Untuk perencanaan kapasitas, jam sibuk, dan antrean, kajian perlu dilengkapi pencatatan waktu kedatangan serta waktu layanan. Sampel yang lebih seimbang menurut hari dan jam juga diperlukan untuk memperkuat kesimpulan.
 
 ## Lampiran: Menjalankan Ulang
 
