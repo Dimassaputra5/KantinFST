@@ -7,7 +7,7 @@ Kantin FST menjadi tempat mahasiswa, staf, dosen, dan pengunjung fakultas membel
 - Setengah kunjungan berakhir dalam 1 menit 47 detik atau kurang. Sebanyak 56% berakhir dalam 2 menit dan 69% dalam 3 menit.
 - Rata-rata kunjungan mencapai 2 menit 33 detik. Angka ini lebih tinggi karena enam kunjungan berlangsung antara 8 menit 2 detik dan 8 menit 50 detik.
 - Kunjungan singkat jauh lebih banyak daripada kunjungan panjang. Jumlah kunjungan menurun ketika durasi bertambah, dengan celah kosong pada rentang 6 sampai 8 menit.
-- Dalam perbandingan utama, log-normal lebih sesuai daripada eksponensial standar (`loc=0`): AIC 915,55 vs 930,92 dan KS D 0,0647 vs 0,1748. Eksponensial bergeser (`loc=14`) masih menjadi alternatif yang masuk akal (AIC 918,17).
+- Dari empat distribusi yang dibandingkan (normal, uniform, log-normal, dan eksponensial standar), **log-normal paling sesuai**: AIC 915,55 dan KS D 0,0647. Eksponensial memiliki AIC 930,92, uniform 965,90, dan normal 971,80.
 - Simulasi 1.000 kunjungan dari model log-normal menghasilkan rata-rata sekitar 2 menit 29 detik dan median sekitar 1 menit 52 detik; proporsi kunjungan singkat tetap mendekati data asli.
 
 ## Latar Belakang
@@ -45,20 +45,20 @@ Rata-rata lebih tinggi daripada nilai tengah. Sebagian besar pengunjung keluar d
 
 ## Pola Kunjungan
 
-Kajian membandingkan tiga model untuk durasi positif: **eksponensial standar** dengan `loc=0`, **log-normal** dengan `loc=0`, dan **eksponensial bergeser** dengan parameter `loc` diestimasi dari data. Model bergeser dimasukkan sebagai analisis sensitivitas karena analisis sebelumnya menggunakan `loc` sebesar nilai minimum yang diamati (14 detik).
+Kajian membandingkan empat kandidat distribusi: **normal**, **uniform**, **log-normal** dengan `loc=0`, dan **eksponensial standar** dengan `loc=0`. Log-normal dan eksponensial dibatasi `loc=0` agar keduanya tidak menggunakan pergeseran lokasi.
 
-Kecocokan diperiksa melalui log-likelihood, AIC/BIC, dan statistik Kolmogorov–Smirnov (KS). AIC/BIC yang lebih kecil menunjukkan model yang lebih disukai dengan mempertimbangkan jumlah parameter; statistik KS `D` yang lebih kecil berarti kurva kumulatif model lebih dekat ke distribusi empiris. Nilai p KS pada tabel dihitung menggunakan **parametric bootstrap 2.000 replikasi**, dengan parameter diestimasi ulang pada setiap replikasi. Ini menghindari penggunaan p-value KS standar secara langsung setelah parameter model diestimasi.
+Kecocokan diperiksa melalui log-likelihood, AIC/BIC, dan statistik Kolmogorov–Smirnov (KS). AIC/BIC yang lebih kecil menunjukkan model yang lebih disukai dengan mempertimbangkan jumlah parameter; statistik KS `D` yang lebih kecil berarti kurva kumulatif model lebih dekat ke distribusi empiris. Nilai p KS pada tabel dihitung dengan **parametric bootstrap 2.000 replikasi**, dan parameter diestimasi ulang di setiap replikasi.
 
-**Tabel 2. Perbandingan kecocokan model distribusi**
+**Tabel 2. Perbandingan kecocokan empat distribusi**
 
 | Model | Parameter hasil fit | Log-likelihood | AIC | BIC | KS D | p-value bootstrap KS |
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| Eksponensial (`loc=0`) | `scale = 153,23` | -464,461 | 930,923 | 933,266 | 0,1748 | 0,0015 |
-| Log-normal (`loc=0`) | `shape = 0,8101`; `scale = 111,14` | -455,774 | **915,548** | **920,236** | **0,0647** | 0,5937 |
-| Eksponensial bergeser | `loc = 14`; `scale = 139,23` | -457,084 | 918,168 | 922,855 | 0,1172 | 0,0685 |
+| Log-normal (`loc=0`) | `shape = 0,8101`; `scale = 111,14` | -455,774 | **915,548** | **920,236** | **0,0647** | 0,6037 |
+| Eksponensial (`loc=0`) | `scale = 153,23` | -464,461 | 930,923 | 933,266 | 0,1748 | 0,0010 |
+| Uniform | `loc = 14`; `scale = 516` | -480,950 | 965,900 | 970,588 | 0,4188 | 0,0005 |
+| Normal | `mean = 153,23`; `std = 129,73` | -483,901 | 971,802 | 976,489 | 0,1835 | 0,0005 |
 
-**Interpretasi.** Log-normal adalah pilihan utama: ia memiliki AIC terendah dan statistik KS paling kecil. Dibanding eksponensial standar (`loc=0`), selisih AIC sekitar 15,37 menunjukkan keunggulan log-normal yang cukup jelas pada data ini. Namun, eksponensial bergeser memperbaiki kecocokan secara berarti dan hanya memiliki AIC 2,62 poin lebih tinggi daripada log-normal. Karena itu, kesimpulannya bukan bahwa eksponensial sama sekali mustahil, melainkan bahwa log-normal lebih disukai dalam perbandingan model yang diuji.
-
+**Interpretasi.** Log-normal paling sesuai dalam perbandingan ini karena mempunyai AIC terendah dan statistik KS D terkecil. Hasil bootstrap KS juga tidak menolak log-normal pada taraf 5% (`p = 0,6037`), sedangkan normal, uniform, dan eksponensial standar ditolak oleh pemeriksaan tersebut (`p < 0,05`). Ini merupakan dukungan relatif untuk log-normal di antara empat kandidat, bukan bukti bahwa distribusi data pasti log-normal.
 Pola data tetap didominasi durasi singkat: 53 dari 77 kunjungan selesai dalam 3 menit atau kurang, sementara 12 kunjungan melewati 5 menit. Enam kunjungan berada di kisaran 8 menit dan termasuk pencilan menurut batas IQR 6 menit 36 detik. Kelompok tersebut berkontribusi pada ekor kanan yang panjang dan perlu dipertahankan dalam analisis karena memang diamati di lapangan.
 
 **Catatan interpretasi uji.** p-value bootstrap yang tidak kecil bukan bukti bahwa model pasti benar. Dengan 77 catatan, hasil ini merupakan dukungan relatif terhadap bentuk distribusi, bukan kepastian mengenai mekanisme yang menghasilkan durasi.
@@ -81,7 +81,7 @@ Simulasi memakai 1.000 durasi baru dari model log-normal (`shape ≈ 0,8101`, `l
 
 Rata-rata dan median hasil simulasi dekat dengan data asli. Proporsi yang selesai dalam 2–5 menit juga berada pada kisaran yang sama, meskipun selisihnya terlihat pada batas 3 dan 5 menit. Simulasi lebih besar daripada sampel asli sehingga nilai ekstrem lebih mungkin muncul; durasi maksimum 24 menit 20 detik adalah keluaran model, bukan pengamatan nyata.
 
-Model log-normal dengan `loc=0` memiliki dukungan positif mulai dekat nol, sehingga simulasi dapat menghasilkan durasi di bawah minimum sampel 14 detik. Nilai minimum yang teramati adalah minimum **dalam sampel**, bukan bukti bahwa durasi di bawah 14 detik mustahil. Jika proses operasional memang memiliki batas minimum yang pasti, model bergeser perlu diuji kembali.
+Model log-normal dengan `loc=0` memiliki dukungan positif mulai dekat nol, sehingga simulasi dapat menghasilkan durasi di bawah minimum sampel 14 detik. Nilai minimum yang teramati adalah minimum **dalam sampel**, bukan bukti bahwa durasi di bawah 14 detik mustahil.
 
 Simulasi ini hanya membangkitkan lama kunjungan. Ia tidak memodelkan waktu kedatangan, antrean, atau jumlah pengunjung yang berada di kantin pada saat bersamaan.
 
@@ -99,13 +99,13 @@ Simulasi yang ada sekarang baru menghasilkan lama kunjungan. Untuk mengukur bera
 - Data berasal dari Kantin FST pada beberapa hari dan jam. Pengunjungnya didominasi mahasiswa, sehingga pola ini belum tentu menggambarkan kebiasaan staf dan dosen. Pola kunjungan juga bisa berbeda pada jam sibuk, hari libur, atau kantin lain.
 - Enam kunjungan sekitar 8 menit tergolong pencilan menurut IQR dan cukup memengaruhi rata-rata. Karena itu, nilai tengah perlu dibaca bersama rata-rata.
 - Data tidak mencatat waktu kedatangan. Kajian ini belum bisa menjelaskan jam ramai, jumlah pengunjung pada waktu yang sama, atau antrean.
-- Log-normal lebih disukai berdasarkan AIC dan statistik KS, tetapi eksponensial bergeser tetap menjadi alternatif. Hasil sensitif terhadap asumsi parameter lokasi dan masih perlu dievaluasi dengan lebih banyak data.
+- Log-normal lebih disukai berdasarkan AIC, statistik KS, dan p-value bootstrap pada perbandingan empat kandidat. Normal, uniform, dan eksponensial standar tidak sesuai menurut pemeriksaan KS bootstrap; hasil tetap perlu dievaluasi dengan lebih banyak data.
 
 ## Kesimpulan
 
 Kunjungan ke Kantin FST didominasi durasi singkat. Nilai tengahnya 1 menit 47 detik, 55,8% kunjungan selesai dalam 2 menit, dan 84,4% selesai dalam 5 menit. Rata-rata 2 menit 33 detik lebih tinggi karena enam kunjungan berlangsung sekitar 8 menit.
 
-Dari tiga model yang dibandingkan, **log-normal (`loc=0`) paling disukai** berdasarkan AIC (915,55) dan statistik KS (D = 0,0647), dibandingkan eksponensial standar (AIC 930,92; D = 0,1748). Eksponensial bergeser dengan `loc=14` dan `scale=139,23` masih masuk akal sebagai alternatif (AIC 918,17), sehingga keunggulan log-normal terhadap model bergeser tidak mutlak. Simulasi 1.000 kunjungan dari model log-normal menghasilkan rata-rata 2 menit 29 detik dan median 1 menit 52 detik.
+Dari empat distribusi yang dibandingkan, **log-normal (`loc=0`) paling disukai** berdasarkan AIC (915,55), statistik KS (D = 0,0647), dan p-value bootstrap KS (0,6037). Eksponensial standar memiliki AIC 930,92; uniform 965,90; dan normal 971,80. Simulasi 1.000 kunjungan dari model log-normal menghasilkan rata-rata 2 menit 29 detik dan median 1 menit 52 detik.
 
 Untuk perencanaan kapasitas, jam sibuk, dan antrean, kajian perlu dilengkapi pencatatan waktu kedatangan serta waktu layanan. Sampel yang lebih seimbang menurut hari dan jam juga diperlukan untuk memperkuat kesimpulan.
 
